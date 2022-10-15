@@ -1,23 +1,33 @@
+#include <unistd.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#define NUM_THREADS 2
+#include <sysinfoapi.h>
 
 void *f(void *arg) {
   	long id = *(long*)arg;
-  	printf("Hello World din thread-ul %ld!\n", id);
+	for(int i = 0; i <100; ++i) {
+  		printf("Hello World din thread-ul %ld!\n", id);
+	}
   	pthread_exit(NULL);
 }
 
+
 int main(int argc, char *argv[]) {
-	pthread_t threads[NUM_THREADS];
+	// Getting the nr of cores
+	SYSTEM_INFO sysinfo;
+	GetSystemInfo(&sysinfo);
+	long cores = sysinfo.dwNumberOfProcessors; // Windows adaptation of the function, since sysconf is only for Linux
+	// long cores = sysconf(_SC_NPROCESSORS_CONF);
+	pthread_t threads[cores];
   	int r;
   	long id;
   	void *status;
-	long ids[NUM_THREADS];
+	long ids[cores];
+		
+	
 
-  	for (id = 0; id < NUM_THREADS; id++) {
+  	for (id = 0; id < cores; id++) {
 		ids[id] = id; 
 		r = pthread_create(&threads[id], NULL, f, &ids[id]);
 
@@ -27,7 +37,7 @@ int main(int argc, char *argv[]) {
 		}
   	}
 
-  	for (id = 0; id < NUM_THREADS; id++) {
+  	for (id = 0; id < cores; id++) {
 		r = pthread_join(threads[id], &status);
 
 		if (r) {
