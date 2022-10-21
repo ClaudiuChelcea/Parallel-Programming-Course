@@ -1,16 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <math.h>
 
 int N;
 int P;
 int **a;
 int **b;
 int **c;
+int i = 0, j = 0, k = 0;
+
+int min (int a, int b) {
+	if(a<b)
+		return a;
+	return b;
+}
 
 void *thread_function(void *arg)
 {
 	int thread_id = *(int *)arg;
+	int start = thread_id  * (double) N / P;
+    int end = min((thread_id + 1) * (double) N / P, N);
 
 	/*
 	for (i = 0; i < N; i++) {
@@ -21,6 +31,16 @@ void *thread_function(void *arg)
 		}
 	}
 	*/
+
+	for (i = start; i < end; i++) {
+		for (j = 0; j < N; j++) {
+			for (k = 0; k < N; k++) {
+				c[i][j] += a[i][k] * b[k][j];
+			}
+		}
+	}
+
+
 
 	pthread_exit(NULL);
 }
