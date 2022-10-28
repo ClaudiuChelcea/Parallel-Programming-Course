@@ -126,8 +126,20 @@ void print()
 void *thread_function(void *arg)
 {
 	int thread_id = *(int *)arg;
+	int start = thread_id * N / 2;
+	int end = min((thread_id + 1) * N / 2, N);
 
-	// implementati aici shear sort paralel
+	  for (k = 0; k < ceil(log2(matrix.lines * matrix.columns)) + 1; k++) {
+    for (i = 0; i < matrix.lines; i += 2) {
+      sortAscendingLine(i);
+    }
+    for (i = 1; i < matrix.lines; i += 2) {
+      sortDescendingLine(i);
+    }
+    for (i = 0; i < matrix.columns; i++) {
+      sortAscendingColumn(i);
+    }
+  }
 
 	pthread_exit(NULL);
 }

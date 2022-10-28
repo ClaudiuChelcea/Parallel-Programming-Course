@@ -52,8 +52,8 @@ void get_args(int argc, char **argv)
 void init()
 {
 	int i;
-	v = malloc(sizeof(int) * N);
-	vQSort = malloc(sizeof(int) * N);
+	v = (int*) malloc(sizeof(int) * N);
+	vQSort = (int*) malloc(sizeof(int) * N);
 
 	if (v == NULL || vQSort == NULL) {
 		printf("Eroare la malloc!");
@@ -75,11 +75,52 @@ void print()
 	compare_vectors(v, vQSort);
 }
 
+void swap(int* a, int* b)
+{
+	int tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
+int min(int a, int b)
+{
+	return a > b? a:b;
+}
+
 void *thread_function(void *arg)
 {
 	int thread_id = *(int *)arg;
+	int start = thread_id * N / 2;
+	int end = min((thread_id + 1) * N / 2, N);
+	int i = 0;
 
-	// implementati aici OETS paralel
+	if(start % 2 == 1) {
+		for (int k = start + 1; k < N; k++) {
+			for (i = 0; i < end - 1; i += 2) {
+				if (v[i] > v[i + 1]) {
+					swap(&v[i], &v[i + 1]);
+				}
+			}
+			for (i = start; i < end - 1; i += 2) {
+				if (v[i] > v[i + 1]) {
+					swap(&v[i], &v[i + 1]);
+				}
+			}
+		}
+	} else {
+		for (int k = start; k < N; k++) {
+			for (i = 0; i < end - 1; i += 2) {
+				if (v[i] > v[i + 1]) {
+					swap(&v[i], &v[i + 1]);
+				}
+			}
+			for (i = start + 1; i < end - 1; i += 2) {
+				if (v[i] > v[i + 1]) {
+					swap(&v[i], &v[i + 1]);
+				}
+			}
+		}
+	}
 
 	pthread_exit(NULL);
 }
@@ -109,20 +150,21 @@ int main(int argc, char *argv[])
 		pthread_join(tid[i], NULL);
 	}
 
-	// bubble sort clasic - trebuie transformat in OETS si paralelizat
-	int sorted = 0;
-	while (!sorted) {
-		sorted = 1;
 
-		for (i = 0; i < N-1; i++) {
-			if(v[i] > v[i + 1]) {
-				aux = v[i];
-				v[i] = v[i + 1];
-				v[i + 1] = aux;
-				sorted = 0;
-			}
-		}
-	}
+	// bubble sort clasic - trebuie transformat in OETS si paralelizat
+	// int sorted = 0;
+	// while (!sorted) {
+	// 	sorted = 1;
+
+	// 	for (i = 0; i < N-1; i++) {
+	// 		if(v[i] > v[i + 1]) {
+	// 			aux = v[i];
+	// 			v[i] = v[i + 1];
+	// 			v[i + 1] = aux;
+	// 			sorted = 0;
+	// 		}
+	// 	}
+	// }
 
 	// se afiseaza vectorul etalon
 	// se afiseaza vectorul curent
